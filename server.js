@@ -62,14 +62,67 @@ app.delete('/restaurant_id/:id',function(req,res) {
     });
 });
 
-app.get('/restaurant_id/:id', function(req,res) {
+//get all
+app.get('/', function(req,res) {
 	var restaurantSchema = require('./models/restaurant');
 	mongoose.connect('mongodb://localhost/test');
 	var db = mongoose.connection;
 	db.on('error', console.error.bind(console, 'connection error:'));
 	db.once('open', function (callback) {
 		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
-		Restaurant.find({restaurant_id: req.params.id},function(err,results){
+		Restaurant.find(function(err,results){
+       		if (err) {
+				res.status(500).json(err);
+				throw err
+			}
+			if (results.length > 0) {
+				res.status(200).json(results);
+			}
+			else {
+				res.status(200).json({message: 'No matching document'});
+			}
+			db.close();
+    	});
+    });
+});
+
+//get with one param
+app.get('/:attrib/:attrib_value', function(req,res) {
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect('mongodb://localhost/test');
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+		var criteria = {};
+		criteria[req.params.attrib] = req.params.attrib_value;
+		Restaurant.find(criteria,function(err,results){
+       		if (err) {
+				res.status(500).json(err);
+				throw err
+			}
+			if (results.length > 0) {
+				res.status(200).json(results);
+			}
+			else {
+				res.status(200).json({message: 'No matching document'});
+			}
+			db.close();
+    	});
+    });
+});
+
+//get with one param in address
+app.get('/address/:attrib/:attrib_value', function(req,res) {
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect('mongodb://localhost/test');
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+		var criteria = {};
+		criteria["address."+req.params.attrib] = req.params.attrib_value;
+		Restaurant.find(criteria,function(err,results){
        		if (err) {
 				res.status(500).json(err);
 				throw err

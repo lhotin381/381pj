@@ -138,4 +138,26 @@ app.get('/address/:attrib/:attrib_value', function(req,res) {
     });
 });
 
+//put with id
+app.put('/:id/:attrib/:attrib_value', function(req,res) {
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect('mongodb://localhost/test');
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+		var criteria = {};
+		criteria[req.params.attrib] = req.params.attrib_value;
+		Restaurant.update({restaurant_id: req.params.id},{$set:criteria},function(err,results){
+       		if (err) {
+				res.status(500).json(err);
+				throw err
+			}
+       		//console.log('Restaurant updated!')
+       		db.close();
+			res.status(200).json({message: 'update done', id: req.params.id});
+    	});
+    });
+});
+
 app.listen(process.env.PORT || 8099);

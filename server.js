@@ -8,43 +8,7 @@ app.use(bodyParser.json());
 var mongodbURL = 'mongodb://localhost:27017/test';
 var mongoose = require('mongoose');
 
-//push without grade
-app.post('/',function(req,res) {
-	//console.log(req.body);
-	var restaurantSchema = require('./models/restaurant');
-	mongoose.connect('mongodb://localhost/test');
-	var db = mongoose.connection;
-	db.on('error', console.error.bind(console, 'connection error:'));
-	db.once('open', function (callback) {
-		var rObj = {};
-		rObj.address = {};
-		rObj.address.building = req.body.building;
-		rObj.address.street = req.body.street;
-		rObj.address.zipcode = req.body.zipcode;
-		rObj.address.coord = [];
-		rObj.address.coord.push(req.body.lon);
-		rObj.address.coord.push(req.body.lat);
-		rObj.borough = req.body.borough;
-		rObj.cuisine = req.body.cuisine;
-		rObj.name = req.body.name;
-		rObj.restaurant_id = req.body.restaurant_id;
-
-		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
-		var r = new Restaurant(rObj);
-		//console.log(r);
-		r.save(function(err) {
-       		if (err) {
-				res.status(500).json(err);
-				throw err
-			}
-       		//console.log('Restaurant created!')
-       		db.close();
-			res.status(200).json({message: 'insert done', id: r._id});
-    	});
-    });
-});
-
-//push with grade
+//post with grade
 app.post('/',function(req,res) {
 	//console.log(req.body);
 	var restaurantSchema = require('./models/restaurant');
@@ -69,7 +33,8 @@ app.post('/',function(req,res) {
 		gObj.grade = req.body.grade;
 		gObj.date = req.body.date;
 		gObj.score = req.body.score;
-		rObj.grades.push(gObj);
+		if(gObj.grade != null && gObj.date != null && gObj.score != null)
+			rObj.grades.push(gObj);
 
 		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
 		var r = new Restaurant(rObj);
@@ -253,20 +218,50 @@ app.put('/:param/:param_value/:attrib/:attrib_value', function(req,res) {
     });
 });
 
-//update coord with param
-app.put('/:param/:param_value/address.coord/:v1/:v2', function(req,res) {
+//update grades with param
+app.put('/:param/:param_value/', function(req,res) {
 	var restaurantSchema = require('./models/restaurant');
 	mongoose.connect('mongodb://localhost/test');
 	var db = mongoose.connection;
 	db.on('error', console.error.bind(console, 'connection error:'));
 	db.once('open', function (callback) {
 		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
-		var criteria = [];
-		criteria.push(req.params.v1);
-		criteria.push(req.params.v2);
+		var gObj = {};
+		gObj.grade = req.body.grade;
+		gObj.date = req.body.date;
+		gObj.score = req.body.score;
 		var param = {};
 		param[req.params.param] = req.params.param_value;
-		Restaurant.update(param,{$set:{coord:criteria}},function(err,results){
+		Restaurant.update(param,{$push:{grades: gObj}},function(err,results){
+       		if (err) {
+				res.status(500).json(err);
+				throw err
+			}
+       		//console.log('Restaurant updated!')
+       		db.close();
+			res.status(200).json({message: 'update done', id: req.params.id});
+    	});
+    });
+});
+
+//update coord with param
+app.put('/:param/:param_value/address/coord/:lon/:lat/', function(req,res) {
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect('mongodb://localhost/test');
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+		var criteria = {};
+		var x = Number(req.params.lon);
+		var y = Number(req.params.lat);
+		console.log(req.params.lon);
+		console.log(req.params.lat);
+		var cArray = [x, y];
+		criteria["address.coord"] = cArray;
+		var param = {};
+		param[req.params.param] = req.params.param_value;
+		Restaurant.update(param,{$set:criteria},function(err,results){
        		if (err) {
 				res.status(500).json(err);
 				throw err

@@ -51,6 +51,7 @@ app.post('/',function(req,res) {
     });
 });
 
+//Delete with retaurant_id
 app.delete('/restaurant_id/:id',function(req,res) {
 	var restaurantSchema = require('./models/restaurant');
 	mongoose.connect('mongodb://localhost/test');
@@ -65,10 +66,72 @@ app.delete('/restaurant_id/:id',function(req,res) {
 			}
        		//console.log('Restaurant removed!')
        		db.close();
-			res.status(200).json({message: 'delete done', id: req.params.id});
+			res.status(200).json({message: 'delete done with restaurant_id', id: req.params.id});
     	});
     });
 });
+
+//Delete with borough
+app.delete('/borough/:borough',function(req,res) {
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect('mongodb://localhost/test');
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+		Restaurant.find({borough: req.params.borough}).remove(function(err) {
+       		if (err) {
+				res.status(500).json(err);
+				throw err
+			}
+       		//console.log('Restaurant removed!')
+       		db.close();
+			res.status(200).json({message: 'delete done with borough', id: req.params.borough});
+    	});
+    });
+});
+
+//Delete with cuisine
+app.delete('/cuisine/:cuisine',function(req,res) {
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect('mongodb://localhost/test');
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+		Restaurant.find({cuisine: req.params.cuisine}).remove(function(err) {
+       		if (err) {
+				res.status(500).json(err);
+				throw err
+			}
+       		//console.log('Restaurant removed!')
+       		db.close();
+			res.status(200).json({message: 'delete done with cuisine', id: req.params.cuisine});
+    	});
+    });
+});
+
+//Delete with address
+app.delete('/address/:attrib/:attrib_value',function(req,res) {
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect('mongodb://localhost/test');
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+                var criteria = {};
+		criteria["address."+req.params.attrib] = req.params.attrib_value;
+		Restaurant.find(criteria).remove(function(err) {
+       		if (err) {
+				res.status(500).json(err);
+				throw err
+			}
+       		//console.log('Restaurant removed!')
+       		db.close();
+			res.status(200).json({message: 'delete done with address', id: req.params.cuisine});
+    	});
+    });
+});	
 
 //get all
 app.get('/', function(req,res) {
@@ -172,7 +235,7 @@ app.get('/grades/:attrib/:attrib_value', function(req,res) {
     });
 });
 
-//put with id
+//put with restaurant_id
 app.put('/:id/:attrib/:attrib_value', function(req,res) {
 	var restaurantSchema = require('./models/restaurant');
 	mongoose.connect('mongodb://localhost/test');

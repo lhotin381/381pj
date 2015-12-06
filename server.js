@@ -153,7 +153,7 @@ app.delete('/address/:attrib/:attrib_value',function(req,res) {
 			res.status(200).json({message: 'delete done with address', id: req.params.cuisine});
     	});
     });
-});
+});	
 
 //get all
 app.get('/', function(req,res) {
@@ -257,7 +257,7 @@ app.get('/grades/:attrib/:attrib_value', function(req,res) {
     });
 });
 
-//put with id
+//put with restaurant_id
 app.put('/:id/:attrib/:attrib_value', function(req,res) {
 	var restaurantSchema = require('./models/restaurant');
 	mongoose.connect('mongodb://localhost/test');
